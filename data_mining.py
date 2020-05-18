@@ -29,13 +29,23 @@ print(X_test.head())
 print(X_test.shape)
 
 #SVM model
-classification_model = svm.SVC(kernel='poly',degree=5,gamma='scale',coef0=5.2,cache_size=500)   #train model using taining sets
+classification_model = svm.SVC(kernel='poly',degree=5,gamma='scale',coef0=5.2, class_weight=None, cache_size=500)   #train model using taining sets
 classification_model.fit(X_train,y_train)
 y_prediction=classification_model.predict(X_test)#predict Y
-print("Accuracy:",metrics.accuracy_score(y_test,y_prediction ))
+accuracy = metrics.accuracy_score(y_test,y_prediction )
+print("Accuracy:",accuracy)
 
-# Model Precision: what percentage of positive tuples are labeled as such?
-#print("Precision:",metrics.precision_score(y_test, y_prediction))
+#Model Precision: what percentage of positive tuples are labeled as such?
+precision = metrics.precision_score(y_test, y_prediction,average='weighted', zero_division=0)#zero_division='warn'
+print("Precision:",precision)
+
 # Model Recall: what percentage of positive tuples are labelled as such?
-#print("Recall:",metrics.recall_score(y_test, y_prediction))
+recall = metrics.recall_score(y_test, y_prediction,average='weighted', zero_division=0)#zero_division='warn'
+print("Recall:",recall)
 
+f1_score_test = 2 * (precision * recall) / (precision + recall)
+f1_score = metrics.f1_score(y_test, y_prediction, average='weighted', zero_division=0)#zero_division='warn'
+print("F1 score diy:",f1_score_test)
+print("F1 score (metricslib):",f1_score)
+
+##########SOS ΕΡΩΤΗΣΗ ΤΙ AVERAGE ΘΕΛΟΥΜΕ?? binary micro macro weighted samples??????????
