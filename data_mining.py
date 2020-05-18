@@ -48,4 +48,5 @@ f1_score = metrics.f1_score(y_test, y_prediction, average='weighted', zero_divis
 print("F1 score diy:",f1_score_test)
 print("F1 score (metricslib):",f1_score)
 
+
 ##########SOS ΕΡΩΤΗΣΗ ΤΙ AVERAGE ΘΕΛΟΥΜΕ?? binary micro macro weighted samples??????????
