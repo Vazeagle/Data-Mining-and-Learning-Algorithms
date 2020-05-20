@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import random
 from sklearn.model_selection import train_test_split
 from sklearn import svm
 from sklearn.svm import SVC
@@ -43,10 +44,55 @@ print("Precision:",precision)
 recall = metrics.recall_score(y_test, y_prediction,average='weighted', zero_division=0)#zero_division='warn'
 print("Recall:",recall)
 
-f1_score_test = 2 * (precision * recall) / (precision + recall)
+
 f1_score = metrics.f1_score(y_test, y_prediction, average='weighted', zero_division=0)#zero_division='warn'
-print("F1 score diy:",f1_score_test)
+
 print("F1 score (metricslib):",f1_score)
 
-
 ##########SOS ΕΡΩΤΗΣΗ ΤΙ AVERAGE ΘΕΛΟΥΜΕ?? binary micro macro weighted samples??????????
+
+#ERWTHMA2
+#ph_to_remove=X_train.pH #get only ph from data trainset
+#train_to_remove=ph_to_remove.sample(frac=0.33, random_state=45)# 0,33% to remove from training dataset
+#X_train=X_train.drop(train_to_remove.index) λαθος γιατί κανει delete ολα τα rows όχι μονο το συγκεκριμενο της στήλης
+
+#randomly remove 33% of ph values of list
+def remove33pH(input_list):
+    rows_counter=len(input_list)
+    remove_counter = round((rows_counter*33)/100)#round number
+    rows_remove_pH = random.sample(range(rows_counter), remove_counter)#return a list of remove_counter numbers from range 0 to rows_counter
+    i=0
+    while i<remove_counter:
+        cur_row=rows_remove_pH[i]#random row to not be sequential
+        #ph exists in 9th column
+        input_list[cur_row].pop(8)
+        input_list[cur_row].insert(8,'zero')#anti zero None aka null in python xwris''
+        i+=1
+    return remove_counter
+
+#checks if removal works as it should
+def check_work(some_list):
+    none_counter = 0
+    j = 0
+    while j < len(some_list):
+        for elem in some_list[j]:
+            if elem == 'zero':  #anti zero None aka null in python xwris''
+                none_counter += 1
+        j += 1
+    print("None count: ", none_counter)
+    print("None expected base on 33%: ", remove33pH(some_list))
+
+X_train_list = X_train.values.tolist()
+print("\nX_train:\n")
+print(X_train_list)
+print(X_train_list[0][8])
+print(X_train_list[1][8])
+remove33pH(X_train_list)
+print(X_train_list)
+print(X_train_list[0][8])
+print(X_train_list[1][8])
+check_work(X_train_list)
+
+#list to dataframe conversion
+#play with columns and rows
+#maybe reverse columns into rows
