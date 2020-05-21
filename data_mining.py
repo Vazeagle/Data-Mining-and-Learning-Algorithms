@@ -79,6 +79,7 @@ def check_work(some_list):
             if elem == 'zero':  #anti zero None aka null in python xwris''
                 none_counter += 1
         j += 1
+    print("\nsize=",len(some_list))
     print("None count: ", none_counter)
     print("None expected base on 33%: ", remove33pH(some_list))
 
@@ -94,5 +95,9 @@ print(X_train_list[1][8])
 check_work(X_train_list)
 
 #list to dataframe conversion
-#play with columns and rows
-#maybe reverse columns into rows
+
+#convert back to dataframe with zeros
+X_train = pd.DataFrame(X_train_list,columns = ['fixed acidity','volatile acidity','citric acid','residual sugar','chlorides','free sulfur dioxide','total sulfur dioxide','density','pH','sulphates','alcohol'])
+print("\nX_train33% :\n")
+print(X_train.head())
+print(X_train.shape)
