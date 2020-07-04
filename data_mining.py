@@ -9,7 +9,9 @@ from sklearn.svm import SVC
 from sklearn import metrics
 from sklearn.datasets import make_blobs
 import numpy as np
+from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+from scipy.spatial.distance import cdist
 
 df = pd.read_csv('winequality-red.csv', delimiter=',')
 X = df.drop('quality', axis=1)  # x= observed data
@@ -27,12 +29,13 @@ print(X_train.head())
 print(X_train.shape)
 
 print("\nX_test:\n")
-print(X_test.head())
-print(X_test.shape)
+print(X_test)
+#print(X_test.head())
+#print(X_test.shape)
 
 # SVM model
-classification_model = svm.SVC(kernel='poly', degree=5, gamma='scale', coef0=5.2, class_weight=None,
-                               cache_size=500)  # train model using taining sets
+#classification_model = svm.SVC(kernel='poly', degree=5, gamma='scale', coef0=5.2, class_weight=None,cache_size=500)  # train model using taining sets
+classification_model = svm.SVC(kernel='poly', degree=5, gamma='scale', coef0=5.2, class_weight='balanced',cache_size=500)
 classification_model.fit(X_train, y_train)
 y_prediction = classification_model.predict(X_test)  # predict Y
 accuracy = metrics.accuracy_score(y_test, y_prediction)
@@ -50,17 +53,7 @@ f1_score = metrics.f1_score(y_test, y_prediction, average='weighted', zero_divis
 
 print("F1 score (metricslib):", f1_score)
 
-##########SOS ΕΡΩΤΗΣΗ ΤΙ AVERAGE ΘΕΛΟΥΜΕ?? binary micro macro weighted samples??????????
-
-# ERWTHMA2--------------------------------------------------------------------------------------------------------------------------------------
-# ERWTHMA2--------------------------------------------------------------------------------------------------------------------------------------
-# ERWTHMA2--------------------------------------------------------------------------------------------------------------------------------------
-
-
-# ph_to_remove=X_train.pH #get only ph from data trainset
-# train_to_remove=ph_to_remove.sample(frac=0.33, random_state=45)# 0,33% to remove from training dataset
-# X_train=X_train.drop(train_to_remove.index) λαθος γιατί κανει delete ολα τα rows όχι μονο το συγκεκριμενο της στήλης
-
+# ERWTHMA B--------------------------------------------------------------------------------------------------------------------------------------
 
 remove_counter = 0
 
@@ -89,11 +82,7 @@ def remove33pH(input_dataframe):
                                              'alcohol'])
     print("\nConverted dataframe of X_train -33%pH\n", output_dataframe)
 
-    #z = 0
-    #copy33 = []
-    #while z <= 3:
-        #copy33.insert(z, input_list1.copy())
-        #z += 1
+
     return [input_list1, output_dataframe]
 
 
@@ -337,12 +326,68 @@ def b3(init_list2):
     return [new_list_pH, new_dataframe_w_pH]
 
 
+def b4(init_list3):
+    list_to_process = init_list3.copy()
+    listX = init_list3.copy()
+
+    #lista gia to X_train
+    X_trainAll_w_pH = pd.DataFrame(listX,
+                                      columns=['fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar',
+                                               'chlorides', 'free sulfur dioxide', 'total sulfur dioxide', 'density',
+                                               'pH', 'sulphates', 'alcohol'])
+    #dataframe me mono X_train all
+    X_trainAll_no_pH = X_trainAll_w_pH.drop('pH', axis=1)
+
+
+
+    rows_with_zero_ph = []  # λιστα που περιέχει ποιές γραμμές ανοικουν στο 33% με σβησμένες τιμές
+    X_train_67_w_pH = []  # λίστα η οποία έχει γραμμές του dataframe που εμειναν αναλοιωτες
+    X_test_33_zero_pH = []  # λιστα που περιέχει το 33% των τιμών που εφαγαν delete στο pH περιέχει zero ή None
+    X_test_33_no_pH = []  # λιστα που περιέχει το 33% των τιμών που εφαγαν delete στο pH περιέχει zero ή None
+    i=0
+    while i < len(list_to_process):
+        elem = list_to_process[i][8]  # for each element in the inside list aka each row
+        if elem != 'zero':  #αν ανήκει στο 67% χωρις διεγραμένο pH
+            X_train_67_w_pH.append(list_to_process[i].copy())
+
+
+        else:   # zero None aka null in python xwris''
+            rows_with_zero_ph.append(i)  # save which rows have no ph value
+            X_test_33_zero_pH.append(list_to_process[i].copy())
+        i += 1
+
+        temp_lista = X_test_33_zero_pH.copy()
+        X_test_df_w_pH = pd.DataFrame(temp_lista,
+                                          columns=['fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar',
+                                                   'chlorides', 'free sulfur dioxide', 'total sulfur dioxide',
+                                                   'density',
+                                                   'pH', 'sulphates', 'alcohol'])
+        X_test_df_no_pH = X_test_df_w_pH.drop('pH', axis=1)
+
+    print("\nX_test_33_zero_pH=\n", X_test_33_zero_pH)
+    print("\ntemp_lista=\n", temp_lista)
+    print("\nX_test_33_no_pH=\n",X_test_df_no_pH)
+
+    X_kai_Y_train_67_w_pH = pd.DataFrame(X_train_67_w_pH,
+                                          columns=['fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar',
+                                                   'chlorides', 'free sulfur dioxide', 'total sulfur dioxide',
+                                                   'density',
+                                                   'pH', 'sulphates', 'alcohol'])
+
+    X_train_kmean = X_kai_Y_train_67_w_pH.drop('pH', axis=1)
+    Y_train_67_pH = X_kai_Y_train_67_w_pH.pH
+
+    X_trainAll_no_pH
+    #επιλεγουμε να χρησιμοποιησουμε 4 clusters για τα kmeans
+    kmeans = KMeans(n_clusters=4, init='k-means++', max_iter=300, n_init=10, random_state=0)
+
+
+
+
 
 
 temp33 = remove33pH(X_train)  # call function to empty 33% random fromof ph
 X_train_list33 = temp33[0]  # resulting list -33%
-#print("33=",temp33[0][1])
-#print("\n length=",len(temp33[0]))
 X_train33 = temp33[1]  # resulting dataframe -33%
 b1_input = pd.DataFrame(X_train_list33,columns=['fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar','chlorides', 'free sulfur dioxide', 'total sulfur dioxide', 'density','pH', 'sulphates', 'alcohol'])
 b2_input = X_train33.values.tolist()
@@ -357,17 +402,72 @@ tempb1 = b1(b1_input)
 X_train_listb1 = tempb1[0]  # list with removed pH element
 X_trainb1 = tempb1[1]  # dataframe with removed pH column
 
+
 # Ερώτημα b2
 tempb2 = b2(b2_input)
 X_train_listb2 = tempb2[0]  # list with M.O. at removed pH values
 X_trainb2 = tempb2[1]  # dataframe with M.O. at removed pH values
 
-# To Do Ερώτημα β3 β4
-# ΑΛΛΑΓΗ ΣΕ PRECISION 4 ΔΕΚΑΔΙΚΩΝ ΨΗΦΙΩΝ ΣΤΟ FLOAT ΓΙΑ ΠΙΟ ΟΚ ΔΕΔΟΜΕΝΑ
 
 # Ερώτημα b3
 # Logistic Regression ειναι binary δηλαδή yes ή no
 
 tempb3 = b3(b3_input)
 X_train_listb3 = tempb3[0]  # list with logistic regression pH values
-X_trainb3 = tempb3[1]  # dataframe with logistic regression removed pH values
+X_trainb3 = tempb3[1]  # dataframe with logistic regression  pH values
+
+
+
+# Ερώτημα b4
+# K-means
+#tempb4 = b4(b4_input)
+#X_train_listb4 = tempb4[0]  # list with K-means pH values
+#X_trainb4 = tempb4[1]  # dataframe with K-means  pH values
+
+
+#############################################################################
+#############################################################################
+#############################################################################
+######################## RESULTS FROM METRICS ###############################
+
+classification_model.fit(X_trainb1, y_train)
+X_test_del_pH = X_test.drop('pH', axis=1)
+y_predictionb1 = classification_model.predict(X_test_del_pH)  # predict Y
+accuracyb1 = metrics.accuracy_score(y_test, y_predictionb1)
+print("\nAccuracy of b1:",accuracyb1)
+f1_score = metrics.f1_score(y_test, y_predictionb1, average='weighted', zero_division=0)
+print("\nf1 score_B1: ",f1_score)
+precision = metrics.precision_score(y_test, y_predictionb1, average='weighted', zero_division=0)  # zero_division='warn'
+print("Precision_B1: ", precision)
+recall = metrics.recall_score(y_test, y_predictionb1, average='weighted', zero_division=0)  # zero_division='warn'
+print("Recall_B1: ", recall)
+
+classification_model.fit(X_trainb2, y_train)
+y_predictionb2 = classification_model.predict(X_test)  # predict Y
+accuracyb2 = metrics.accuracy_score(y_test, y_predictionb2)
+print("\nAccuracy of b2:",accuracyb2)
+f1_score = metrics.f1_score(y_test, y_predictionb2, average='weighted', zero_division=0)
+print("\nf1 score_B2:",f1_score)
+precision = metrics.precision_score(y_test, y_predictionb2, average='weighted', zero_division=0)  # zero_division='warn'
+print("Precision_B2:", precision)
+recall = metrics.recall_score(y_test, y_predictionb2, average='weighted', zero_division=0)  # zero_division='warn'
+print("Recall_B2:", recall)
+
+classification_model.fit(X_trainb3, y_train)
+y_predictionb3 = classification_model.predict(X_test)  # predict Y
+accuracyb3 = metrics.accuracy_score(y_test, y_predictionb3)
+print("\nAccuracy of b3: ",accuracyb3)
+f1_score = metrics.f1_score(y_test, y_predictionb3, average='weighted', zero_division=0)
+print("\nf1 score_B3: ",f1_score)
+precision = metrics.precision_score(y_test, y_predictionb3, average='weighted', zero_division=0)  # zero_division='warn'
+print("Precision_B3: ", precision)
+recall = metrics.recall_score(y_test, y_predictionb3, average='weighted', zero_division=0)  # zero_division='warn'
+print("Recall_B3: ", recall)
+
+
+
+#classification_model.fit(X_trainb4, y_train)
+#y_predictionb4 = classification_model.predict(X_test)  # predict Y
+#accuracyb4 = metrics.accuracy_score(y_test, y_prediction)
+#print("Accuracy of b4:"accuracyb4)
+#f1_score = metrics.f1_score(y_test, y_prediction, average='weighted', zero_division=0)
