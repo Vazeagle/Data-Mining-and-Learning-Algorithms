@@ -55,7 +55,6 @@ print("F1 score (metricslib):", f1_score)
 # ERWTHMA2--------------------------------------------------------------------------------------------------------------------------------------
 # ERWTHMA2--------------------------------------------------------------------------------------------------------------------------------------
 # ERWTHMA2--------------------------------------------------------------------------------------------------------------------------------------
-# ERWTHMA2--------------------------------------------------------------------------------------------------------------------------------------
 
 
 # ph_to_remove=X_train.pH #get only ph from data trainset
@@ -153,9 +152,12 @@ def b2(init_list):
 
 
 # B.3 fill None with Logistic regression of 67%  of Xtraint that has ph(use it as train model)
-def b3(init_list2):
-    input_list = init_list2
-    input_list_copy = input_list.copy()
+def b3(init_list):
+    input_list = init_list.copy()
+
+    input_list_copy = init_list.copy()
+
+
     rows_with_no_ph = [] #λιστα που περιέχει ποιές γραμμές ανοικουν στο 33% με σβησμένες τιμές
     X_train_split_67 = []   #λίστα η οποία έχει γραμμές του dataframe που εμειναν αναλοιωτες
     X_test_split_33 = []   #λιστα που περιέχει το 33% των τιμών που εφαγαν delete στο pH περιέχει zero ή None
@@ -164,36 +166,39 @@ def b3(init_list2):
     temp_sub_list67 = []  # προσωρινη lista gia eswterika integers stis listes
     temp_sub_list33 = []  # προσωρινη lista gia eswterika integers stis listes
     i = 0
-    print(init_list2)#----------------sososososososososososososososososososososososososoSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOS
+    print("ANTE GAMHSOY MALAKIA PROGRAMMA")
+    print(init_list)#----------------sososososososososososososososososososososososososoSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOS
+    SKATA_NA_FAS= init_list.copy()
+    print(SKATA_NA_FAS)
 
-    while i < len(init_list2):
+    while i < len(init_list):
         elem = input_list[i][8]  # for each element in the inside list aka each row
-        if elem != 'zero':  # anti zero None aka null in python xwris''
-            X_train_split_67.append(input_list[i])
+        if elem != 'zero':  #αν ανήκει στο 67% χωρις διεγραμένο pH
+            X_train_split_67.append(input_list[i].copy())
 
             if len(temp_sub_list67)>0:
                 temp_sub_list67.clear()# αδειασμα λιστας για νεα στοιχεία
 
             for sub_element in input_list[i]:
                 temp_sub_list67.append(int(round(sub_element)))  # εδω ειναι μια λιστα που περιέχει όλες τις τιμές σαν int μιας σειρας απο το dataframe
-            split_67_int.append(temp_sub_list67)  # προσθηκη στη λίστα ως integer
-            print("\ntemplist67=", temp_sub_list67)
-            print("\nlist67=", split_67_int)
+            split_67_int.append(temp_sub_list67.copy())  # προσθηκη στη λίστα ως integer
+            #print("\ntemplist67=", temp_sub_list67)
+            #print("\nlist67=", split_67_int)
 
-        else:   #αν ανήκει στο 67% χωρις διεγραμένο pH
+        else:   # zero None aka null in python xwris''
             rows_with_no_ph.append(i)  # save which rows have no ph value
-            X_test_split_33.append(input_list[i])
+            X_test_split_33.append(input_list[i].copy())
 
             input_list_copy[i].pop(8)  # delete 'zero' or None
 
             if len(temp_sub_list33)>0:
                 temp_sub_list33.clear()# αδειασμα λιστας για νεα στοιχεία
 
-            for sub_element in input_list_copy[i]:  # δημιουργώ την λίστα που θα αποτελέσει το X_test του logistic regression
+            for sub_element in input_list_copy[i]:# δημιουργώ την λίστα που θα αποτελέσει το X_test του logistic regression
                 temp_sub_list33.append(int(round(sub_element)))  # εδω ειναι μια λιστα που περιέχει όλες τις τιμές σαν int μιας σειρας απο το dataframe
-            split_33_int.append(temp_sub_list33)  # προσθηκη στη λίστα ως integer
-            print("\ntemplist33=",temp_sub_list33)
-            print("\nlist33=", split_33_int)
+            split_33_int.append(temp_sub_list33.copy())  # προσθηκη στη λίστα ως integer
+            #print("\ntemplist33=",temp_sub_list33)
+            #print("\nlist33=", split_33_int)
         i += 1
 
     print("\namount of rows with zero ph:", len(rows_with_no_ph))
@@ -215,24 +220,26 @@ def b3(init_list2):
                                      columns=['fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar','chlorides', 'free sulfur dioxide', 'total sulfur dioxide', 'density','sulphates', 'alcohol'])
     print("\nNew X_test dataframe with  no pH:\n", X_test_dataframe)
 
-    logreg = LogisticRegression()  # αρχικοποιηση με default τιμες του logistic regression
+    logreg = LogisticRegression(max_iter=10000)  # αρχικοποιηση με default τιμες του logistic regression
     logreg.fit(X_log_reg, y_log_reg)
     y_prediction_pH = logreg.predict(X_test_dataframe)  # predict Y
     print("\n\n\n Y PREDICTION PH\n",y_prediction_pH)
 
-    y_pred_list_pH = y_prediction_pH.values.tolist()
+    y_pred_list_pH = y_prediction_pH.tolist()
     print("\n list with pH predictions=\n",y_pred_list_pH)
+    print("length of y test=",len(y_pred_list_pH))
 
-    c1=0
+
     c2=0
-    while l < len(input_list):
-        elem_list = input_list[i][8]  # for each element in the inside list aka each row
-        if elem_list == 'zero':
-            input_list[i].pop(8)
-            input_list[i].insert(y_pred_list_pH[c2])
+    print("\nSKATAAAA\n",SKATA_NA_FAS)
+    for list_el in SKATA_NA_FAS:
+        #print("\nMALAKIA", elem_of_list)
+        elem_of_list = list_el[8]  # for each element in the inside list aka each row
+        if elem_of_list == 'zero':
+            list_el.pop(8)
+            list_el.insert(8,y_pred_list_pH[c2])
             c2+=1
-        l+=1
-    new_list_pH=input_list
+    new_list_pH=SKATA_NA_FAS
     print("\nNum of pH changed = ",c2,"\n")
 
     #ΝΕΑ ΛΙΣΤΑ ΜΕΤΑ ΑΠΟ ΕΠΕΞΕΡΓΑΣΙΑ ΚΑΙ ΣΥΜΠΛΉΡΩΣΗ ΤΩΝ ΚΕΝΏΝ ΜΕ  LOGISTIC REGRESSION
@@ -240,7 +247,7 @@ def b3(init_list2):
                                  columns=['fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar',
                                           'chlorides', 'free sulfur dioxide', 'total sulfur dioxide', 'density',
                                           'pH', 'sulphates', 'alcohol'])
-    print("\nX_train_ with avg replace in pH null:\n", new_dataframe)
+    print("\nX_train_ with logistic regression in pH null:\n", new_dataframe_w_pH)
 
     return [new_list_pH, new_dataframe_w_pH]
 
@@ -259,7 +266,8 @@ X_train_listb1 = tempb1[0]  # list with removed pH element
 X_trainb1 = tempb1[1]  # dataframe with removed pH column
 
 # Ερώτημα b2
-#tempb2 = b2(X_train_list33)
+#b2_X_train_list33= X_train_list33.copy()
+#tempb2 = b2(b2_X_train_list33)
 #X_train_listb2 = tempb2[0]  # list with M.O. at removed pH values
 #X_trainb2 = tempb2[1]  # dataframe with M.O. at removed pH values
 
@@ -269,6 +277,7 @@ X_trainb1 = tempb1[1]  # dataframe with removed pH column
 # Ερώτημα b3
 # Logistic Regression ειναι binary δηλαδή yes ή no
 #print("idfk",X_train_list33)
+#b3_X_train_list33= X_train_list33.copy()
 tempb3 = b3(X_train_list33)
 X_train_listb3 = tempb3[0]  # list with logistic regression pH values
 X_trainb3 = tempb3[1]  # dataframe with logistic regression removed pH values
