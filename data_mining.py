@@ -34,8 +34,7 @@ print(X_test)
 #print(X_test.shape)
 
 # SVM model
-#classification_model = svm.SVC(kernel='poly', degree=5, gamma='scale', coef0=5.2, class_weight=None,cache_size=500)  # train model using taining sets
-classification_model = svm.SVC(kernel='poly', degree=5, gamma='scale', coef0=5.2, class_weight='balanced',cache_size=500)
+classification_model = svm.SVC(kernel='poly', degree=5, gamma='scale', coef0=5.2, class_weight=None,cache_size=500) #train model using taining sets
 classification_model.fit(X_train, y_train)
 y_prediction = classification_model.predict(X_test)  # predict Y
 accuracy = metrics.accuracy_score(y_test, y_prediction)
@@ -161,10 +160,7 @@ def b3(init_list2):
     temp_sub_list67 = []  # προσωρινη lista gia eswterika integers stis listes
     temp_sub_list33 = []  # προσωρινη lista gia eswterika integers stis listes
     i = 0
-    print("ANTE GAMHSOY MALAKIA PROGRAMMA")
-    print(init_list2)#----------------sososososososososososososososososososososososososoSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOSOS
-    SKATA_NA_FAS= init_list2.copy()
-    print(SKATA_NA_FAS)
+    #print(init_list2)
 
     while i < len(init_list2):
         elem = input_list2[i][8]  # for each element in the inside list aka each row
@@ -296,17 +292,15 @@ def b3(init_list2):
 
 
     c2=0
-    print("33skata",X_test_split_33)
-    print("67skata", X_train_split_67)
+    print("X_test_split_33",X_test_split_33)
+    print("X_train_split_67", X_train_split_67)
     new_final_list = X_train_split_67.copy()
     row_count=0
     for it_elem in X_test_split_33:
         new_final_list.insert(rows_with_no_ph[row_count],it_elem)
         row_count+=1
-    print("\nSKATAAAA\n",SKATA_NA_FAS)
-    print("\nSAKIIIS\n",new_final_list)
+    print("\nfinal list\n",new_final_list)
     for list_el in new_final_list:
-        #print("\nMALAKIA", elem_of_list)
         elem_of_list = list_el[8]  # for each element in the inside list aka each row
         if elem_of_list == 'zero':
             list_el.pop(8)
@@ -377,14 +371,16 @@ def b4(init_list3):
     X_train_kmean = X_kai_Y_train_67_w_pH.drop('pH', axis=1)
     Y_train_67_pH = X_kai_Y_train_67_w_pH.pH
 
-    X_trainAll_no_pH
+    #X_trainAll_no_pH
     #επιλεγουμε να χρησιμοποιησουμε 4 clusters για τα kmeans
     kmeans = KMeans(n_clusters=4, init='k-means++', max_iter=300, n_init=10, random_state=0)
+    centers=kmeans.fit(X_trainAll_no_pH).cluster_centers_
+
+    #y_kmeans = kmeans.predict()
+    print("\ncenters=",centers)
 
 
-
-
-
+    return ["lisit", "dataframe"]
 
 temp33 = remove33pH(X_train)  # call function to empty 33% random fromof ph
 X_train_list33 = temp33[0]  # resulting list -33%
@@ -420,9 +416,9 @@ X_trainb3 = tempb3[1]  # dataframe with logistic regression  pH values
 
 # Ερώτημα b4
 # K-means
-#tempb4 = b4(b4_input)
-#X_train_listb4 = tempb4[0]  # list with K-means pH values
-#X_trainb4 = tempb4[1]  # dataframe with K-means  pH values
+tempb4 = b4(b4_input)
+X_train_listb4 = tempb4[0]  # list with K-means pH values
+X_trainb4 = tempb4[1]  # dataframe with K-means  pH values
 
 
 #############################################################################
